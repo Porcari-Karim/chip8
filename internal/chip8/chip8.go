@@ -1,31 +1,39 @@
 package chip8
 
 import (
-	"fmt"
+	"os"
+
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"os"
+	"github.com/golang-collections/collections/stack"
 )
 
 type Emulator struct {
 	ram       *Ram
 	registers *Registers
 	display   *Display
-	stack     Stack
+	stack     *stack.Stack
 	key       KeyState
+	rom_size int
 }
 
 func NewInstance() *Emulator {
-	return &Emulator{
+	return &Emulator{  
 		NewRam(),
 		NewRegisters(),
 		NewDisplay(),
-		NewStack(),
+		stack.New(),
 		KeyState{},
+		0,
 	}
 }
 
 func (e *Emulator) EmulateCycle() {
+	if int(e.registers.Pc) < (e.rom_size + 0x200) {
+		opcode := e.FetchOpCode()
+		e.DecodeOpCode(opcode)
+		e.registers.Pc +=2
+	}
 
 }
 
@@ -57,10 +65,7 @@ func run() {
 	if err != nil {
 		panic(err)
 	}
-	emulator.registers.Pc = 0x200
-	for _, b := range emulator.ram.data[0x200:0x200 + rom_size] {
-		fmt.Printf("0x%04x \n", b)
-	}
+	emulator.rom_size = int(rom_size)
 	for !window.Closed() {
 		emulator.EmulateCycle()
 		window.Update()
