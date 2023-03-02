@@ -113,3 +113,48 @@ func (e* Emulator) LD8(x byte, y byte)  {
 func (e* Emulator) OR8(x byte, y byte)  {
 	e.registers.Vx[x] = e.registers.Vx[x] | e.registers.Vx[y]
 }
+
+func (e* Emulator) AND8(x byte, y byte)  {
+	e.registers.Vx[x] = e.registers.Vx[x] & e.registers.Vx[y]
+}
+func (e* Emulator) XOR8(x byte, y byte)  {
+	e.registers.Vx[x] = e.registers.Vx[x] ^ e.registers.Vx[y]
+}
+func (e* Emulator) ADD8(x byte, y byte)  {
+	e.registers.Vx[x] += e.registers.Vx[y]
+	if e.registers.Vx[x] > 255 {
+		e.registers.Vx[0xF] = 1
+		return
+	}
+	e.registers.Vx[0xF] = 0
+}
+func (e* Emulator) SUB8(x byte, y byte)  {
+	e.registers.Vx[0xF] = 0
+	if e.registers.Vx[x] > e.registers.Vx[y]{
+		e.registers.Vx[0xF] = 1
+	}
+	e.registers.Vx[x] -= e.registers.Vx[y]
+}
+func (e * Emulator) SHR8(x byte){
+	last_significant_bit := x & byte(0x01)
+	e.registers.Vx[0xF] = last_significant_bit
+	e.registers.Vx[x] = e.registers.Vx[x] >> 1
+}
+func (e* Emulator) SUBN8(x byte, y byte)  {
+	e.registers.Vx[0xF] = 0
+	if e.registers.Vx[y] > e.registers.Vx[x]{
+		e.registers.Vx[0xF] = 1
+	}
+	e.registers.Vx[y] -= e.registers.Vx[x]
+}
+func (e * Emulator) SHL8(x byte){
+	most_significant_bit := x & byte(0xF0)
+	e.registers.Vx[0xF] = most_significant_bit >> 3
+	e.registers.Vx[x] = e.registers.Vx[x]  << 1
+}
+func (e * Emulator) SNE9(x byte, y byte){
+	if e.registers.Vx[x] != e.registers.Vx[y] {
+		e.registers.Pc += 2
+	}
+}
+
