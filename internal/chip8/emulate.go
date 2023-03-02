@@ -2,6 +2,7 @@ package chip8
 
 import (
 	"fmt"
+	"math/rand"
 )
 
 func (e *Emulator) FetchOpCode() OpCode {
@@ -13,7 +14,12 @@ func (e *Emulator) FetchOpCode() OpCode {
 
 func (e *Emulator) DecodeOpCode(opcode OpCode) {
 	I := opcode & 0xF000
-	fmt.Printf("0x%04x \n", opcode)
+	x := byte((opcode & 0x0F00) >> 2)
+	y := byte((opcode & 0x00F0) >> 1)
+	n := byte(opcode & 0x000F)
+	//nnn := opcode & 0x0FFF
+	//fmt.Println(x, y, n)
+	
 	switch(I){
 	case 0x0000 :
 		{
@@ -66,11 +72,17 @@ func (e *Emulator) DecodeOpCode(opcode OpCode) {
 		{
 			break
 		}
+	case 0xD000:
+		{
+			fmt.Printf("0x%04x \n", opcode)
+			e.DRWD(x, y, n)
+			break
+		}
 	}
 }
  
 func (e *Emulator) ClearScreen(){
-	e.display.pixels = [32 * 64]byte{}
+	e.display.pixels = make([]byte, (32 * 64) / 8)
 }
 
 func (e * Emulator) GoTo(adress uint16){
@@ -156,5 +168,28 @@ func (e * Emulator) SNE9(x byte, y byte){
 	if e.registers.Vx[x] != e.registers.Vx[y] {
 		e.registers.Pc += 2
 	}
+}
+func (e *Emulator) LDA(adress uint16){
+	e.registers.I = adress
+}
+func (e * Emulator) JPB(adress uint16){
+	e.registers.Pc = uint16(e.registers.Vx[0]) + adress
+}
+func (e *Emulator) RNDC(x byte){
+	random_byte := byte(rand.Intn(255))
+	e.registers.Vx[x] = e.registers.Vx[x] & random_byte
+}
+func (e* Emulator) DRWD(x byte, y byte, n uint8){
+	fmt.Println("Drawing: ", x, y, n)
+	I := e.registers.I
+	row := byte(0)
+	cast_n := uint16(n)
+	x *= 8
+	for I < cast_n {
+		fmt.Println("Ram Data: ", e.ram.data[I])
+		e.display.pixels[x + row*8 + y] ^= e.ram.data[I] 
+		I++
+	}
+
 }
 

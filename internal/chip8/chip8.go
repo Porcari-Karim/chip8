@@ -65,9 +65,11 @@ func run() {
 	if err != nil {
 		panic(err)
 	}
+	//emulator.display.pixels[100] = 0b11111111
 	emulator.rom_size = int(rom_size)
 	for !window.Closed() {
 		emulator.EmulateCycle()
+		emulator.Draw(window)
 		window.Update()
 	}
 }

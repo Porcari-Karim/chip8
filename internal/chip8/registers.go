@@ -6,7 +6,7 @@ type Registers struct {
 	Delay byte
 	Sound byte
 
-	I byte
+	I uint16
 	Sp byte
 	Pc uint16
 }
