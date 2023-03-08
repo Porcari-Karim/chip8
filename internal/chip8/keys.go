@@ -1,3 +1,13 @@
 package chip8
 
-type KeyState [16]byte
+import (
+	"github.com/faiface/pixel/pixelgl"
+)
+
+type KeyState struct {
+	window *pixelgl.Window
+}
+
+func (k *KeyState) CheckKeyState(key pixelgl.Button) bool {
+	return k.window.JustPressed(key)
+}

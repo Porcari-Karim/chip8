@@ -1,6 +1,7 @@
 package chip8
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/faiface/pixel"
@@ -14,11 +15,11 @@ type Emulator struct {
 	display   *Display
 	stack     *stack.Stack
 	key       KeyState
-	rom_size int
+	rom_size  int
 }
 
 func NewInstance() *Emulator {
-	return &Emulator{  
+	return &Emulator{
 		NewRam(),
 		NewRegisters(),
 		NewDisplay(),
@@ -32,7 +33,7 @@ func (e *Emulator) EmulateCycle() {
 	if int(e.registers.Pc) < (e.rom_size + 0x200) {
 		opcode := e.FetchOpCode()
 		e.DecodeOpCode(opcode)
-		e.registers.Pc +=2
+		e.registers.Pc += 2
 	}
 
 }
@@ -42,11 +43,12 @@ func (e *Emulator) LoadGame() (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	fi , err := os.Stat("assets/rom/rom.rom")
+	fi, err := os.Stat("assets/rom/rom.rom")
 	if err != nil {
 		return 0, err
 	}
 	copy(e.ram.data[0x200:], rom)
+	e.rom_size = int(fi.Size())
 	return fi.Size(), nil
 }
 
@@ -61,12 +63,13 @@ func run() {
 		panic(err)
 	}
 
-	rom_size , err := emulator.LoadGame()
+	rom_size, err := emulator.LoadGame()
 	if err != nil {
+		fmt.Println(rom_size)
 		panic(err)
 	}
 	//emulator.display.pixels[100] = 0b11111111
-	emulator.rom_size = int(rom_size)
+
 	for !window.Closed() {
 		emulator.EmulateCycle()
 		emulator.Draw(window)
